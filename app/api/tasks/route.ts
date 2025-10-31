@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server"
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient()
+    const supabase = await createClient({ serviceRole: true })
     const searchParams = request.nextUrl.searchParams
 
     const difficulty = searchParams.get("difficulty")
