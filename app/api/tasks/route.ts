@@ -14,12 +14,14 @@ export async function GET(request: NextRequest) {
 
     let query = supabase.from("tasks").select("*").eq("status", "active")
 
-    if (difficulty) {
+    if (difficulty && difficulty !== "all") {
       query = query.eq("difficulty", difficulty)
     }
 
     if (location === "remote") {
       query = query.ilike("location", "%Remote%")
+    } else if (location && location !== "all") {
+      query = query.ilike("location", `%${location}%`)
     }
 
     if (minReward) {
@@ -38,15 +40,19 @@ export async function GET(request: NextRequest) {
       query = query.order("completed_count", { ascending: false })
     }
 
-    query = query.limit(20)
+    query = query.limit(50)
 
     const { data, error } = await query
 
-    if (error) throw error
+    if (error) {
+      console.error("[v0] Supabase error:", error)
+      throw error
+    }
 
+    console.log("[v0] Fetched tasks:", data?.length || 0)
     return NextResponse.json({ tasks: data || [] })
   } catch (error) {
-    console.error("Error fetching tasks:", error)
-    return NextResponse.json({ error: "Failed to fetch tasks" }, { status: 500 })
+    console.error("[v0] Error fetching tasks:", error)
+    return NextResponse.json({ error: "Failed to fetch tasks", tasks: [] }, { status: 200 })
   }
 }

@@ -78,6 +78,10 @@ CREATE POLICY "Users can update their own profile" ON public.users
 CREATE POLICY "Anyone can view active tasks" ON public.tasks
   FOR SELECT USING (status = 'active');
 
+-- Add policy to allow public (unauthenticated) access to view active tasks
+CREATE POLICY "Public can view active tasks" ON public.tasks
+  FOR SELECT USING (status = 'active') WITH CHECK (true);
+
 CREATE POLICY "Clients can insert their own tasks" ON public.tasks
   FOR INSERT WITH CHECK (auth.uid() = client_id);
 
