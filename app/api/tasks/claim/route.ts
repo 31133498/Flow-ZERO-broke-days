@@ -1,31 +1,29 @@
-import { createClient } from "@/lib/supabase/server"
 import { NextResponse, type NextRequest } from "next/server"
+import { DummyDataStore } from "@/lib/dummy-data"
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient()
     const { taskId } = await request.json()
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    if (!taskId) {
+      return NextResponse.json({ error: "Task ID is required" }, { status: 400 })
     }
 
-    // Create task submission record
-    const { data, error } = await supabase.from("task_submissions").insert({
-      task_id: taskId,
-      worker_id: user.id,
-      status: "submitted",
-    })
+    // For demo purposes, use worker-1 as the current user
+    const workerId = 'worker-1'
 
-    if (error) throw error
+    // Check if task exists and is active
+    const task = DummyDataStore.getTask(taskId)
+    if (!task || task.status !== 'active') {
+      return NextResponse.json({ error: "Task not found or not active" }, { status: 404 })
+    }
 
-    return NextResponse.json({ submission: data })
+    // Claim the task
+    const result = DummyDataStore.claimTask(taskId, workerId)
+    
+    return NextResponse.json({ success: true, message: result.message })
   } catch (error) {
     console.error("Error claiming task:", error)
-    return NextResponse.json({ error: "Failed to claim task" }, { status: 500 })
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

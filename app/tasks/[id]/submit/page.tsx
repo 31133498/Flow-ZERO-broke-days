@@ -2,25 +2,37 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter, useParams } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { Upload, CheckCircle } from "lucide-react"
+import { Upload, CheckCircle, ArrowLeft } from "lucide-react"
 import { toast } from "sonner"
+import { DummyDataStore } from "@/lib/dummy-data"
+import Link from "next/link"
 
 export default function TaskSubmitPage() {
   const router = useRouter()
   const params = useParams()
   const taskId = params.id as string
 
+  const [task, setTask] = useState<any>(null)
   const [submission, setSubmission] = useState("")
   const [proofFiles, setProofFiles] = useState<File[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const [isUploading, setIsUploading] = useState(false)
+
+  useEffect(() => {
+    // Get task details
+    const taskData = DummyDataStore.getTask(taskId)
+    if (taskData) {
+      setTask(taskData)
+    } else {
+      toast.error("Task not found")
+      router.push("/dashboard")
+    }
+  }, [taskId, router])
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])
@@ -37,27 +49,12 @@ export default function TaskSubmitPage() {
     setIsLoading(true)
 
     try {
-      const supabase = createClient()
+      // Mock file upload URLs
+      const proofUrls = proofFiles.map((file, index) => 
+        `/uploads/${taskId}-${Date.now()}-${index}-${file.name}`
+      )
 
-      // Upload proof files to Supabase Storage (mock implementation)
-      const proofUrls: string[] = []
-      if (proofFiles.length > 0) {
-        setIsUploading(true)
-        for (const file of proofFiles) {
-          const fileName = `${taskId}-${Date.now()}-${file.name}`
-          const { error: uploadError } = await supabase.storage.from("task-submissions").upload(fileName, file)
-
-          if (uploadError) {
-            console.error("Upload error:", uploadError)
-          } else {
-            const { data } = supabase.storage.from("task-submissions").getPublicUrl(fileName)
-            proofUrls.push(data.publicUrl)
-          }
-        }
-        setIsUploading(false)
-      }
-
-      // Update submission with proof and mark as ready for verification
+      // Submit the task
       const response = await fetch("/api/tasks/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -72,7 +69,7 @@ export default function TaskSubmitPage() {
         throw new Error("Failed to submit task")
       }
 
-      toast.success("Task submitted for verification!")
+      toast.success("Task submitted for verification! You'll be paid within 60 seconds once approved.")
       router.push("/dashboard")
     } catch (error) {
       console.error("Submission error:", error)
@@ -82,16 +79,46 @@ export default function TaskSubmitPage() {
     }
   }
 
+  if (!task) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background to-muted py-8">
+        <div className="max-w-2xl mx-auto px-4">
+          <div className="text-center py-12">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            <p className="mt-4 text-muted-foreground">Loading task...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted py-8">
       <div className="max-w-2xl mx-auto px-4">
+        <Link href="/dashboard" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6">
+          <ArrowLeft className="w-4 h-4" />
+          Back to Dashboard
+        </Link>
+        
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-xl">{task.title}</CardTitle>
+            <CardDescription>{task.description}</CardDescription>
+            <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+              <span>Reward: <strong className="text-primary">${task.reward}</strong></span>
+              <span>Time: {task.time_estimate}</span>
+              <span>Difficulty: {task.difficulty}</span>
+            </div>
+          </CardHeader>
+        </Card>
+        
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CheckCircle className="w-6 h-6 text-primary" />
               Submit Your Work
             </CardTitle>
-            <CardDescription>Upload proof and describe what you completed</CardDescription>
+            <CardDescription>Upload proof and describe what you completed for instant payment</CardDescription>
           </CardHeader>
 
           <CardContent>
@@ -162,8 +189,8 @@ export default function TaskSubmitPage() {
                 >
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isLoading || isUploading} className="flex-1">
-                  {isLoading || isUploading ? "Submitting..." : "Submit for Verification"}
+                <Button type="submit" disabled={isLoading} className="flex-1">
+                  {isLoading ? "Submitting..." : "Submit for Verification"}
                 </Button>
               </div>
             </form>

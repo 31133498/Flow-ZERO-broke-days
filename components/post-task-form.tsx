@@ -4,7 +4,6 @@ import type React from "react"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -18,7 +17,7 @@ export function PostTaskForm() {
     title: "",
     description: "",
     reward: "",
-    timeEstimate: "",
+    time_estimate: "",
     location: "",
     difficulty: "Easy",
     tags: "",
@@ -36,34 +35,34 @@ export function PostTaskForm() {
     setIsLoading(true)
 
     try {
-      const supabase = createClient()
-
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-
-      if (!user) throw new Error("Not authenticated")
-
       const tags = formData.tags
         .split(",")
         .map((t) => t.trim())
         .filter((t) => t)
 
-      const { error } = await supabase.from("tasks").insert({
-        client_id: user.id,
+      const taskData = {
         title: formData.title,
         description: formData.description,
         reward: Number.parseFloat(formData.reward),
-        time_estimate: formData.timeEstimate,
+        time_estimate: formData.time_estimate,
         location: formData.location,
-        difficulty: formData.difficulty,
-        tags,
-        status: "active",
+        difficulty: formData.difficulty as 'Easy' | 'Medium' | 'Hard',
+        tags
+      }
+
+      const response = await fetch('/api/client/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(taskData)
       })
 
-      if (error) throw error
+      if (!response.ok) {
+        throw new Error('Failed to post task')
+      }
 
-      toast.success("Task posted successfully!")
+      const result = await response.json()
+      const taskCount = result.atomizedTasks?.length || 1
+      toast.success(`Task atomized into ${taskCount} smaller tasks!`)
       router.push("/client/dashboard")
     } catch (error) {
       console.error("Error posting task:", error)
@@ -116,12 +115,12 @@ export function PostTaskForm() {
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="timeEstimate">Estimated Time</Label>
+          <Label htmlFor="time_estimate">Estimated Time</Label>
           <Input
-            id="timeEstimate"
-            name="timeEstimate"
+            id="time_estimate"
+            name="time_estimate"
             placeholder="e.g., 30 min"
-            value={formData.timeEstimate}
+            value={formData.time_estimate}
             onChange={handleChange}
             required
           />
@@ -171,7 +170,7 @@ export function PostTaskForm() {
           Cancel
         </Button>
         <Button type="submit" disabled={isLoading} className="flex-1">
-          {isLoading ? "Posting..." : "Post Task"}
+          {isLoading ? "AI Atomizing..." : "Post Task (Auto-Atomized)"}
         </Button>
       </div>
     </form>

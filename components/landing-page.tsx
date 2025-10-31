@@ -5,10 +5,24 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { ArrowRight, Zap, Shield, Clock, CheckCircle, TrendingUp, Gauge, Users, BarChart3 } from "lucide-react"
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 
 export function LandingPage() {
   const { login } = useDummyAuth()
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState<"students" | "orgs">("students")
+  const [isLoggingIn, setIsLoggingIn] = useState(false)
+
+  const handleLogin = async (type: "worker" | "client") => {
+    setIsLoggingIn(true)
+    login(type)
+    
+    // Small delay to ensure login state is set
+    setTimeout(() => {
+      const targetPath = type === 'client' ? '/client/dashboard' : '/dashboard'
+      router.push(targetPath)
+    }, 100)
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/50 to-background">
@@ -37,8 +51,8 @@ export function LandingPage() {
             >
               For Organizations
             </button>
-            <Button size="sm" variant="outline" onClick={() => login("worker")}>
-              Sign In
+            <Button size="sm" variant="outline" onClick={() => handleLogin("worker")} disabled={isLoggingIn}>
+              {isLoggingIn ? 'Signing In...' : 'Sign In'}
             </Button>
           </nav>
         </div>
@@ -88,17 +102,19 @@ export function LandingPage() {
                 <Button
                   size="lg"
                   className="bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent/70 text-accent-foreground text-lg h-14 px-8 font-semibold shadow-lg"
-                  onClick={() => login("client")}
+                  onClick={() => handleLogin("client")}
+                  disabled={isLoggingIn}
                 >
-                  Post Your First Project <ArrowRight className="ml-2 w-5 h-5" />
+                  {isLoggingIn ? 'Loading...' : 'Post Your First Project'} <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
                 <Button
                   size="lg"
                   variant="outline"
                   className="border-2 border-primary/30 hover:border-primary/60 text-lg h-14 px-8 bg-transparent"
-                  onClick={() => login("worker")}
+                  onClick={() => handleLogin("worker")}
+                  disabled={isLoggingIn}
                 >
-                  See Sample Tasks
+                  {isLoggingIn ? 'Loading...' : 'See Sample Tasks'}
                 </Button>
               </div>
             </div>
@@ -171,17 +187,19 @@ export function LandingPage() {
                 <Button
                   size="lg"
                   className="bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent/70 text-accent-foreground text-lg h-14 px-8 font-semibold shadow-lg"
-                  onClick={() => login("worker")}
+                  onClick={() => handleLogin("worker")}
+                  disabled={isLoggingIn}
                 >
-                  Start Earning Now <ArrowRight className="ml-2 w-5 h-5" />
+                  {isLoggingIn ? 'Loading...' : 'Start Earning Now'} <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
                 <Button
                   size="lg"
                   variant="outline"
                   className="border-2 border-primary/30 hover:border-primary/60 text-lg h-14 px-8 bg-transparent"
-                  onClick={() => login("client")}
+                  onClick={() => handleLogin("client")}
+                  disabled={isLoggingIn}
                 >
-                  Post Tasks for Teams
+                  {isLoggingIn ? 'Loading...' : 'Post Tasks for Teams'}
                 </Button>
               </div>
             </div>
@@ -275,9 +293,10 @@ export function LandingPage() {
             <Button
               size="lg"
               className="w-full mt-8 bg-accent/20 text-accent hover:bg-accent/30 border border-accent/30"
-              onClick={() => login("client")}
+              onClick={() => handleLogin("client")}
+              disabled={isLoggingIn}
             >
-              Post Your First Project
+              {isLoggingIn ? 'Loading...' : 'Post Your First Project'}
             </Button>
           </Card>
 
@@ -306,9 +325,10 @@ export function LandingPage() {
             <Button
               size="lg"
               className="w-full mt-8 bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent/70 text-accent-foreground"
-              onClick={() => login("worker")}
+              onClick={() => handleLogin("worker")}
+              disabled={isLoggingIn}
             >
-              Start Earning Now
+              {isLoggingIn ? 'Loading...' : 'Start Earning Now'}
             </Button>
           </Card>
         </div>
@@ -371,17 +391,19 @@ export function LandingPage() {
               <Button
                 size="lg"
                 className="bg-gradient-to-r from-accent to-accent/80 hover:from-accent/90 hover:to-accent/70 text-accent-foreground h-14 px-10 text-lg font-semibold shadow-lg"
-                onClick={() => login("worker")}
+                onClick={() => handleLogin("worker")}
+                disabled={isLoggingIn}
               >
-                I'm a Student - Let's Earn
+                {isLoggingIn ? 'Loading...' : "I'm a Student - Let's Earn"}
               </Button>
               <Button
                 size="lg"
                 variant="outline"
                 className="border-2 border-accent/30 hover:border-accent/60 h-14 px-10 text-lg font-semibold bg-transparent"
-                onClick={() => login("client")}
+                onClick={() => handleLogin("client")}
+                disabled={isLoggingIn}
               >
-                I'm an Organization - Let's Scale
+                {isLoggingIn ? 'Loading...' : "I'm an Organization - Let's Scale"}
               </Button>
             </div>
           </div>

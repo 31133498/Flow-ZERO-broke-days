@@ -11,7 +11,8 @@ export default function Home() {
 
   useEffect(() => {
     if (!isLoading && user) {
-      router.push("/dashboard")
+      const targetPath = user.type === 'client' ? '/client/dashboard' : '/dashboard'
+      router.push(targetPath)
     }
   }, [user, isLoading, router])
 

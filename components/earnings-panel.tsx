@@ -2,6 +2,7 @@
 
 import { TrendingUp, Award, Target } from "lucide-react"
 import useSWR from "swr"
+import Link from "next/link"
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
 
@@ -53,10 +54,15 @@ export function EarningsPanel() {
         </div>
       </div>
 
-      {/* Payout Settings */}
-      <button className="w-full mt-6 px-4 py-2 bg-accent text-accent-foreground rounded-lg font-semibold hover:shadow-md transition-all">
-        Payout Settings
-      </button>
+      {/* Navigation Links */}
+      <div className="space-y-2 mt-6">
+        <Link href="/earnings" className="block w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg font-semibold hover:shadow-md transition-all text-center">
+          View Full Earnings
+        </Link>
+        <Link href="/payout-settings" className="block w-full px-4 py-2 bg-accent text-accent-foreground rounded-lg font-semibold hover:shadow-md transition-all text-center">
+          Payout Settings
+        </Link>
+      </div>
     </div>
   )
 }

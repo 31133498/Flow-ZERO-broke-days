@@ -1,10 +1,51 @@
 "use client"
 
-import { ChevronRight, Zap, Clock } from "lucide-react"
-import { useState } from "react"
+import { ChevronRight, Zap, Clock, TrendingUp } from "lucide-react"
+import { useState, useEffect } from "react"
+import { DummyDataStore } from "@/lib/dummy-data"
+import { toast } from "sonner"
 
 export function InstantPayCard() {
   const [isHovering, setIsHovering] = useState(false)
+  const [balance, setBalance] = useState(0)
+  const [countdown, setCountdown] = useState(60)
+  const [isWithdrawing, setIsWithdrawing] = useState(false)
+
+  useEffect(() => {
+    // Get user balance
+    const user = DummyDataStore.getUser('worker-1')
+    if (user) {
+      setBalance(user.instant_pay_balance)
+    }
+
+    // Countdown timer
+    const timer = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) {
+          return 60 // Reset to 60 seconds
+        }
+        return prev - 1
+      })
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [])
+
+  const handleWithdraw = async () => {
+    if (balance <= 0) {
+      toast.error("No funds available to withdraw")
+      return
+    }
+
+    setIsWithdrawing(true)
+    
+    // Simulate instant withdrawal
+    setTimeout(() => {
+      toast.success(`$${balance.toFixed(2)} withdrawn instantly to your account!`)
+      setBalance(0)
+      setIsWithdrawing(false)
+    }, 1500)
+  }
 
   return (
     <div
@@ -30,30 +71,44 @@ export function InstantPayCard() {
             <p className="text-accent-foreground/80 text-sm font-semibold uppercase tracking-wide mb-2">
               Ready to Withdraw
             </p>
-            <h2 className="text-5xl font-bold text-accent-foreground mb-1">¥1,847.50</h2>
-            <p className="text-accent-foreground/90 text-sm">Completed Tasks This Week</p>
+            <h2 className="text-5xl font-bold text-accent-foreground mb-1">${balance.toFixed(2)}</h2>
+            <p className="text-accent-foreground/90 text-sm flex items-center gap-1">
+              <TrendingUp className="w-4 h-4" />
+              Earned from completed tasks
+            </p>
           </div>
 
           {/* Timer */}
           <div className="flex items-center gap-3 p-4 bg-accent-foreground/10 rounded-xl backdrop-blur-sm border border-accent-foreground/10">
             <Clock className="w-5 h-5 text-accent-foreground" />
             <div>
-              <p className="text-xs font-semibold text-accent-foreground/80 uppercase tracking-wide">Next Payment</p>
-              <p className="text-lg font-bold text-accent-foreground">60 Seconds</p>
+              <p className="text-xs font-semibold text-accent-foreground/80 uppercase tracking-wide">
+                {balance > 0 ? 'Instant Withdrawal' : 'Next Task Available'}
+              </p>
+              <p className="text-lg font-bold text-accent-foreground">
+                {balance > 0 ? 'Available Now' : `${countdown}s`}
+              </p>
             </div>
           </div>
 
           {/* CTA Button */}
           <button
+            onClick={handleWithdraw}
+            disabled={balance <= 0 || isWithdrawing}
             className={`
               w-full group flex items-center justify-center gap-2 px-6 py-4 
               bg-accent-foreground text-accent rounded-xl font-bold 
               transition-all duration-300 hover:shadow-xl transform
-              ${isHovering ? "scale-105" : "scale-100"}
+              disabled:opacity-50 disabled:cursor-not-allowed
+              ${isHovering && balance > 0 ? "scale-105" : "scale-100"}
             `}
           >
-            <span>Withdraw Now</span>
-            <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            <span>
+              {isWithdrawing ? 'Processing...' : balance > 0 ? 'Withdraw Now' : 'Complete Tasks to Earn'}
+            </span>
+            {balance > 0 && !isWithdrawing && (
+              <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            )}
           </button>
         </div>
       </div>

@@ -91,7 +91,7 @@ export function TaskCard({ task }: { task: Task }) {
         </div>
         <div className="flex items-center gap-1">
           <Users className="w-4 h-4" />
-          <span>{task.completedCount.toLocaleString()}</span>
+          <span>{task.completedCount?.toLocaleString() || 0}</span>
         </div>
       </div>
 

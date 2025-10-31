@@ -25,14 +25,6 @@ interface Submission {
   submission_data: Record<string, any>
   proof_media_url: string[]
   submitted_at: string
-  tasks: {
-    title: string
-    reward: number
-    client_id: string
-  }
-  profiles: {
-    display_name: string
-  }
 }
 
 export function SubmissionsList({ submissions }: { submissions: Submission[] }) {
