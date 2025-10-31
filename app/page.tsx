@@ -1,28 +1,34 @@
 "use client"
 
-import { useRouter } from "next/navigation"
 import { useEffect } from "react"
-import { createClient } from "@/lib/supabase/client"
+import { useRouter } from "next/navigation"
+import { LandingPage } from "@/components/landing-page"
+import { useDummyAuth } from "@/hooks/use-dummy-auth"
 
 export default function Home() {
   const router = useRouter()
+  const { user, isLoading } = useDummyAuth()
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const supabase = createClient()
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-
-      if (user) {
-        router.push("/dashboard")
-      } else {
-        router.push("/auth/login")
-      }
+    if (!isLoading && user) {
+      router.push("/dashboard")
     }
+  }, [user, isLoading, router])
 
-    checkAuth()
-  }, [router])
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="mt-4 text-muted-foreground">Loading Flow...</p>
+        </div>
+      </div>
+    )
+  }
 
-  return null
+  if (user) {
+    return null
+  }
+
+  return <LandingPage />
 }
