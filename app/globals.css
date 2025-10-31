@@ -17,7 +17,7 @@
   --secondary-foreground: oklch(0.15 0 0);
   --muted: oklch(0.93 0 0);
   --muted-foreground: oklch(0.5 0 0);
-  --accent: oklch(0.65 0.25 60); /* Bright Orange #FFC107 for InstantPay */
+  --accent: oklch(0.7 0.26 50); /* Brighter, more energetic orange for "Get Paid" emphasis */
   --accent-foreground: oklch(0.15 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.577 0.245 27.325);
@@ -25,7 +25,7 @@
   --input: oklch(0.95 0 0);
   --ring: oklch(0.45 0.28 264);
   --chart-1: oklch(0.45 0.28 264);
-  --chart-2: oklch(0.65 0.25 60);
+  --chart-2: oklch(0.7 0.26 50);
   --chart-3: oklch(0.72 0.15 150);
   --chart-4: oklch(0.85 0.1 200);
   --chart-5: oklch(0.6 0.12 40);
@@ -34,7 +34,7 @@
   --sidebar-foreground: oklch(0.15 0 0);
   --sidebar-primary: oklch(0.45 0.28 264);
   --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.65 0.25 60);
+  --sidebar-accent: oklch(0.7 0.26 50);
   --sidebar-accent-foreground: oklch(0.15 0 0);
   --sidebar-border: oklch(0.92 0 0);
   --sidebar-ring: oklch(0.45 0.28 264);
